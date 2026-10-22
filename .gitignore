@@ -17,9 +17,11 @@ data/
 
 # Docker
 docker-compose.override.yml
+docker-volumes/
+site/
 
 # IDE / SO
 .vscode/
 .idea/
-.DS_StoreREADME.html
+.DS_Store
 README.html
