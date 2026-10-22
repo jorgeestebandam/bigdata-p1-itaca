@@ -11,6 +11,7 @@ venv/
 
 # Datos y salidas
 data/
+
 *.csv
 *.parquet
 *.log
