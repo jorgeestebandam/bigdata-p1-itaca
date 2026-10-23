@@ -81,8 +81,8 @@ docker compose down
 ## Bitácora de prácticas
 
 
-### [Bloque 0 · Entorno ](./bloque0.md)
-### [Bloque 1 · Ingesta de datos ](./bloque1.md)
+### [Bloque 0 · Entorno ](./documentación/bloque0.md)
+### [Bloque 1 · Ingesta de datos ](./documentación/bloque1.md)
 
 ## Equipo
 
