@@ -1,5 +1,6 @@
 
 ## ENTORNO
+
 **Objetivo:** dejar preparado el entorno base del proyecto: repositorio Git independiente, estructura de carpetas, `.gitignore`, `docker-compose.yml` con MongoDB y README inicial.
 
 **Pasos realizados:**
@@ -19,7 +20,7 @@
 
 **Resultado:** contenedor `bigdata-mongo` en ejecución.
 
-![docker compose ps](docs/docker-compose-ps.png)
+![docker compose ps](../docs/docker-compose-ps.png)
 
 ## Decisiones técnicas
 
