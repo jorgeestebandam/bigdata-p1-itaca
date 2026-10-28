@@ -27,5 +27,3 @@
 |---|---|---|
 | MongoDB como almacenamiento | Base de datos relacional | Los XML de ITACA tienen estructura anidada, que encaja de forma natural en documentos |
 | Docker Compose para el entorno | Instalación local de MongoDB | Entorno reproducible y aislado, sin instalar nada en el equipo |
-
-### [< Página principal >](./README.md)
