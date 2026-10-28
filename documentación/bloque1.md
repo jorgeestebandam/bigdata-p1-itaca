@@ -102,4 +102,3 @@ Tras ejecutar el script, comprobar que:
  
 En el Bloque 2 se modelarán `calificaciones` y `contenidos` en MongoDB, pensando en las consultas del futuro dashboard de Power BI.
 
-### [< Página principal >](./README.md)
