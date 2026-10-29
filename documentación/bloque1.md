@@ -1,3 +1,4 @@
+
 ## Fuentes de datos
  
 ### Mecanismo de acceso
@@ -8,13 +9,18 @@ Cursos académicos procesados: `2021-22`, `2022-23`, `2023-24`, `2024-25` y `202
  
 ### Tablas y campos
  
+Además de los campos listados, todos los registros incluyen `Anyo` (curso académico, p. ej. `2021-22`).
+ 
 | Tabla | Campos |
 |---|---|
-| `alumnos` | `Anyo`, `NIA`, `Curso`, `Turno`, `Grupo` |
-| `cursos` | `Anyo`, `Curso`, `Nombre_Curso`, `Nombre_Curso_Val`, `Abreviatura`, `Padre` |
-| `calificaciones` | `Anyo`, `NIA`, `Curso`, `Modulo`, `Nota`, `Evaluacion` |
-| `contenidos` | `Anyo`, `Curso`, `Modulo`, `Nombre_Modulo` |
-| `grupos` | `Anyo`, `Grupo`, `Nombre_Grupo`, `Turno`, `Modalidad`, `Capacidad` |
+| `alumnos` | `NIA`, `sexo`, `nacionalidad`, `provincia`, `municipio`, `ensenanza`, `curso`, `grupo`, `turno`, `linea`, `modalidad`, `repite`, `estado_matricula`, `tipo_matricula`, `fecha_matricula`, `fecha_ingreso_centro` |
+| `cursos` | `codigo`, `nombre_cas`, `nombre_val`, `abreviatura`, `ensenanza`, `padre` |
+| `calificaciones` | `evaluacion`, `alumno`, `ensenanza`, `curso`, `contenido`, `bloque_contenido`, `nota_numerica`, `tipo_nota` |
+| `contenidos` | `codigo`, `nombre_cas`, `nombre_val`, `ensenanza`, `curso` |
+| `grupos` | `Grupo`, `Nombre_Grupo`, `Turno`, `Modalidad`, `Capacidad` |
+ 
+
+```
  
 ## Estructura de carpetas
  
@@ -27,7 +33,7 @@ proyecto-1-itaca/
     │   │       ├── 2021-22/    # XML de origen
     │   │       ├── 2022-23/
     │   │       └── ...
-    │   └── raw/               
+    │   └── raw/
     │       ├── 2021-22/
     │       └── ...
     └── scripts/
@@ -56,16 +62,18 @@ python ingesta/scripts/ingesta_itaca_xml.py
 2. **Crea la carpeta de destino** `ingesta/data/raw/<curso>/` si no existe.
 3. **Lista los `.xml`** de la carpeta del curso.
 4. **Detecta la tabla** a partir del nombre del fichero (`alumnos`, `cursos`, `calificaciones`, `contenidos`, `grupos`). Los ficheros no reconocidos se ignoran con un aviso.
-5. **Extrae los registros**: toma el primer elemento hijo de la raíz como contenedor y recorre sus nodos, leyendo los atributos definidos en `CAMPOS`.
-6. **Limpia los valores**: elimina espacios y convierte cadenas vacías en `None` (`null` en JSON).
-7. **Anonimiza el NIA** (ver siguiente apartado).
-8. **Guarda un JSON** con el mismo nombre que el XML en `ingesta/data/raw/<curso>/`, en UTF-8 y con `ensure_ascii=False` para conservar tildes y eñes.
+5. **Obtiene el mapa de campos** de la tabla con `mapa_campos` (una vez por fichero, no por nodo).
+6. **Extrae los registros**: toma el primer elemento hijo de la raíz como contenedor y recorre sus nodos, leyendo los atributos definidos en `CAMPOS`.
+7. **Limpia los valores**: elimina espacios y convierte cadenas vacías en `None` (`null` en JSON).
+8. **Anonimiza el NIA** (ver siguiente apartado).
+9. **Guarda un JSON** con el mismo nombre que el XML en `ingesta/data/raw/<curso>/`, en UTF-8 y con `ensure_ascii=False` para conservar tildes y eñes.
 ### Funciones principales
  
 | Función | Responsabilidad |
 |---|---|
 | `obtener_archivos_xml` | Lista los XML de un directorio |
 | `detectar_tabla` | Asocia un fichero a una tabla por su nombre |
+| `mapa_campos` | Normaliza la definición de `CAMPOS` (lista o diccionario) a `{campo_json: atributo_xml}` |
 | `extraer_registros` | Parsea el XML y construye la lista de registros |
 | `limpiar` | Normaliza espacios y vacíos |
 | `anonimizar_nia` | Sustituye el NIA por un identificador anónimo |
@@ -80,7 +88,7 @@ def anonimizar_nia(nia: str) -> str:
     return hashlib.sha256(str(nia).encode()).hexdigest()[:10]
 ```
  
-- Se aplica a los campos incluidos en `CAMPOS_ANONIMIZAR` (`NIA`), tanto en `alumnos` como en `calificaciones`.
+- Se aplica a los campos incluidos en `CAMPOS_ANONIMIZAR` (`NIA` en `alumnos` y `alumno` en `calificaciones`). La comprobación se hace contra el nombre del campo en el JSON.
 - La función es **determinista**: un mismo NIA genera siempre el mismo identificador, por lo que `alumnos` y `calificaciones` siguen pudiendo cruzarse.
 - No se guarda ningún mapa NIA → identificador, de modo que el proceso no deja rastro del dato original.
 ## Manejo de errores y logging
@@ -94,11 +102,12 @@ Tras ejecutar el script, comprobar que:
  
 - [x] Existe una carpeta por curso en `ingesta/data/raw/` con un JSON por cada XML.
 - [x] No aparece ningún NIA real en los JSON.
-- [x] El NIA anonimizado coincide entre `alumnos` y `calificaciones` para el mismo alumno.
-- [x] Todo `Modulo` de `calificaciones` existe en `contenidos` (mismo `Anyo` y `Curso`).
-- [x] Todo `Grupo` de `alumnos` existe en `grupos`.
+- [x] El NIA anonimizado coincide entre `alumnos` (`NIA`) y `calificaciones` (`alumno`) para el mismo alumno.
+- [x] Todo `contenido` de `calificaciones` existe en `contenidos` (mismo `Anyo` y `curso`).
+- [x] Todo `grupo` de `alumnos` existe en `grupos`.
 - [x] El número de registros del log coincide con el de nodos del XML.
 ## Próximos pasos
  
 En el Bloque 2 se modelarán `calificaciones` y `contenidos` en MongoDB, pensando en las consultas del futuro dashboard de Power BI.
+ 
 

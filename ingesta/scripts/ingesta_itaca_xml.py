@@ -34,44 +34,55 @@ EXPORT_DIRS = [
     directory_25_26_path,
 ]
 
-TABLAS = ["alumnos", "cursos", "calificaciones", "contenidos", "grupos"]
+TABLAS = ["alumnos", "cursos", "calificaciones", "contenidos"]
 
 CAMPOS = {
-    "alumnos": {
-        "NIA": "NIA",
-        "Curso": "curso",
-        "Turno": "turno",
-        "Grupo": "grupo",
-    },
-    "cursos": {
-        "Curso": "codigo",
-        "Nombre_Curso": "nombre_cas",
-        "Nombre_Curso_Val": "nombre_val",
-        "Abreviatura": "abreviatura",
-        "Padre": "padre",
-    },
-    "calificaciones": {
-        "NIA": "alumno",
-        "Curso": "curso",
-        "Modulo": "contenido",
-        "Nota": "nota_numerica",
-        "Evaluacion": "evaluacion",
-    },
-    "contenidos": {
-        "Curso": "curso",
-        "Modulo": "codigo",
-        "Nombre_Modulo": "nombre_cas",
-    },
-    "grupos": {
-        "Grupo": "codigo",
-        "Nombre_Grupo": "nombre",
-        "Turno": "turno",
-        "Modalidad": "modalidad",
-        "Capacidad": "capacidad",
-    },
+    "alumnos": [
+        "NIA",
+        "sexo",
+        "nacionalidad",
+        "provincia",
+        "municipio",
+        "ensenanza",
+        "curso",
+        "grupo",
+        "turno",
+        "linea",
+        "modalidad",
+        "repite",
+        "estado_matricula",
+        "tipo_matricula",
+        "fecha_matricula",
+        "fecha_ingreso_centro",
+    ],
+    "cursos": [
+        "codigo",
+        "nombre_cas",
+        "nombre_val",
+        "abreviatura",
+        "ensenanza",
+        "padre",
+    ],
+    "calificaciones": [
+        "evaluacion",
+        "alumno",
+        "ensenanza",
+        "curso",
+        "contenido",
+        "bloque_contenido",
+        "nota_numerica",
+        "tipo_nota",
+    ],
+    "contenidos": [
+        "codigo",
+        "nombre_cas",
+        "nombre_val",
+        "ensenanza",
+        "curso",
+    ],
 }
 
-CAMPOS_ANONIMIZAR = {"NIA"}
+CAMPOS_ANONIMIZAR = {"NIA", "alumno"}
 
 
 def obtener_archivos_xml(directory_path):
@@ -84,7 +95,8 @@ def obtener_archivos_xml(directory_path):
 
 def extraer_fecha(directory_path):
     fecha = directory_path.name
-    return fecha
+    fecha_partido = fecha.split("-")
+    return fecha_partido[0]
 
 
 def crear_nuevo_directorio(directory_path):
@@ -124,12 +136,14 @@ def procesar_archivo(file, nuevo_directorio):
         return
 
     ruta_json = guardar_json(registros, file, nuevo_directorio)
+
     logger.info(
-        "%s -> %s (%d registros, tabla '%s')",
+        "%s -> %s (%d registros, tabla '%s', año '%s')",
         file.name,
         ruta_json.name,
         len(registros),
         tabla,
+        anyo,
     )
 
 
@@ -140,6 +154,12 @@ def detectar_tabla(file):
             return tabla
     return None
 
+def mapa_campos(tabla):
+    campos = CAMPOS[tabla]
+    if isinstance(campos, dict):
+        return campos
+    return {c: c for c in campos}
+
 
 def extraer_registros(file, tabla, anyo):
     raiz = ET.parse(file).getroot()
@@ -147,10 +167,12 @@ def extraer_registros(file, tabla, anyo):
     if contenedor is None:
         return []
 
+    mapa = mapa_campos(tabla)  # se calcula una vez por archivo, no por nodo
+
     registros = []
     for nodo in contenedor:
-        registro = {"Anyo": anyo}
-        for campo_json, atributo_xml in CAMPOS[tabla].items():
+        registro = {"anyo": anyo}
+        for campo_json, atributo_xml in mapa.items():
             valor = limpiar(nodo.get(atributo_xml))
             if campo_json in CAMPOS_ANONIMIZAR and valor is not None:
                 valor = anonimizar_nia(valor)
