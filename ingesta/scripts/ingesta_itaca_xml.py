@@ -40,6 +40,7 @@ CAMPOS = {
     "alumnos": [
         "NIA",
         "sexo",
+        "fecha_nac",
         "nacionalidad",
         "provincia",
         "municipio",
