@@ -19,10 +19,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 RAW_DIR = Path(BASE_DIR / "ingesta" / "data" / "raw")
 DIRECTORY_NAMES = ["2021"]  # Aqui se agregaran las siguientes carpetas de años
 FILE_NAMES = ["alumnos.json", "calificaciones.json", "contenidos.json" , "cursos.json"]
-# Variables (No aplicado todavia)
-ALUMNOS = ["NIA","anyo","fecha_nac","turno"]
-CALIFICACIONES = ["alumno","anyo","curso","contenido","nota_numerica","evaluacion"]
-
 
 def get_path(directory_name, file_name):
     return RAW_DIR / directory_name / file_name
