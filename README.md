@@ -83,6 +83,7 @@ docker compose down
 
 ### [Bloque 0 · Entorno ](./documentación/bloque0.md)
 ### [Bloque 1 · Ingesta de datos ](./documentación/bloque1.md)
+### [Bloque 2 · Modelo documental y carga en MongoDB ](./documentación/bloque2.md)
 
 ## Equipo
 

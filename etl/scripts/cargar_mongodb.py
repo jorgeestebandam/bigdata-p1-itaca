@@ -1,20 +1,20 @@
 import logging
-from pathlib import Path
-from pymongo import MongoClient
-from dotenv import load_dotenv
 import json
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 from mongodb.conexion import connect_db
 
 load_dotenv()
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-BD_NAME = "mibase"
+BD_NAME = os.getenv("DB_NAME")
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 RAW_DIR = Path(BASE_DIR / "ingesta" / "data" / "raw")
 DIRECTORY_NAMES = ["2021", "2022", "2023", "2024", "2025"]
@@ -25,6 +25,11 @@ VARIABLES = {
         "anyo": "anyo",
         "fecha_nac": "fecha_nac",
         "turno": "turno",
+        "curso": "curso",
+        "grupo": "grupo",
+        "sexo": "sexo",
+        "repite": "repite",
+        "estado_matricula": "estado_matricula",
     },
     "calificaciones": {
         "alumno": "nia",
@@ -42,12 +47,21 @@ VARIABLES = {
     },
 }
 CAMPOS_CURSO = ["ciclo", "familia", "primseg", "grado"]
+COLECCIONES = ["alumnos", "calificaciones", "modulos", "cursos"]
+
+
+def limpiar_bd(db):
+    # Recarga completa: se borran las colecciones (y sus índices) antes de cargar
+    for col in COLECCIONES:
+        db[col].drop()
+    logger.info("Colecciones borradas")
 
 
 def crear_indices(db):
     db["calificaciones"].create_index([("curso", 1), ("anyo", 1), ("evaluacion", 1)])
     db["calificaciones"].create_index("nia")
     db["alumnos"].create_index([("nia", 1), ("anyo", 1)])
+    db["alumnos"].create_index([("curso", 1), ("anyo", 1)])
     db["modulos"].create_index([("modulo", 1), ("anyo", 1), ("curso", 1)], unique=True)
     logger.info("Índices creados")
 
@@ -211,5 +225,6 @@ def procesar_archivo(db, file_path, file_name):
 
 if __name__ == "__main__":
     db = connect_db(BD_NAME)
-    recorrer_directorios(db)
+    limpiar_bd(db)
     crear_indices(db)
+    recorrer_directorios(db)
